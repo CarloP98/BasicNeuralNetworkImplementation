@@ -6,23 +6,23 @@ function gaussianRandom() {
 }
 
 const activations = {
-  	sigmoid: (x) => div(1, sum(1,exp(mul(-1,x)))),
+  	sigmoid: (x) => div(1, sum(1,exp(dotProd(-1,x)))),
   	relu: (x) => x.map(function(r){return r.map(function(c){return Math.max(0,c);});})
 };
 
 const activations_bp = {
-	sigmoid: (dA, Z) => dotProd(dA,dotProd(activations["sigmoid"](Z), sub(1,activations["sigmoid"](Z)))),
+	sigmoid: (dA, Z) => mul(dA,mul(activations["sigmoid"](Z), sub(1,activations["sigmoid"](Z)))),
 	relu: (dA, Z) => dA.map((row,i)=>row.map((col,j)=>(Z[i][j]<=0)?0:col))
 }
 
 const costs ={
-	"cross-entrophy": (AL,Y)=> (-1/Y.length)*msum(sum(dotProd(Y, log(AL)), dotProd(sub(1,Y), log(sub(1,AL))))),
+	"cross-entrophy": (AL,Y)=> (-1/Y.length)*msum(sum(mul(Y, log(AL)), mul(sub(1,Y), log(sub(1,AL))))),
 	"mse": (AL,Y)=> (1/Y.length)*msum(square(sub(Y,AL))),
 }
 
 const costs_bp = {
-	"cross-entrophy": (AL,Y) => mul(-1,sub(div(Y, AL),div(sub(1,Y),sub(1,AL)))),
-	"mse": (AL,Y) => mul(-2/AL[0].length, sub(Y,AL))
+	"cross-entrophy": (AL,Y) => dotProd(-1,sub(div(Y, AL),div(sub(1,Y),sub(1,AL)))),
+	"mse": (AL,Y) => dotProd(-2/AL[0].length, sub(Y,AL))
 }
 
 const weightInitialize = (size) =>{
@@ -106,8 +106,8 @@ class nn {
 
   	updateParameters(grads){
   		for(var layer=1; layer<Math.floor(Object.keys(this.parameters).length/2)+1; layer++){
-  			this.parameters["W" + layer] = sub(this.parameters["W" + layer], dotProd(this.learningRate, grads["dW" + layer]));
-  			this.parameters["b" + layer] = sub(this.parameters["b" + layer], dotProd(this.learningRate, grads["db" + layer]));
+  			this.parameters["W" + layer] = sub(this.parameters["W" + layer], mul(this.learningRate, grads["dW" + layer]));
+  			this.parameters["b" + layer] = sub(this.parameters["b" + layer], mul(this.learningRate, grads["db" + layer]));
   		}
   	}
 }
